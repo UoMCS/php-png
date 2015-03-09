@@ -1,2 +1,3 @@
-# php-png
-Library for manipulating PNG files in PHP
+# PHP PNG
+
+Library for manipulating PNG files in PHP.
