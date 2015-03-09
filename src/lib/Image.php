@@ -24,7 +24,7 @@ class Image
 
   private function validateHeader($header)
   {
-    return ($header == $this->_signature);
+    return ($header === $this->_signature);
   }
 
   protected function getContents($contents)
