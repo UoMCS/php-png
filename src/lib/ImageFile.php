@@ -28,6 +28,8 @@ class ImageFile extends Image
       throw new Exception('Could not read file: ' . $filename);
     }
 
+    parent::__construct();
+
     $this->setContents($contents);
   }
 }
