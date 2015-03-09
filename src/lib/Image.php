@@ -6,7 +6,7 @@ class Image
 {
   private $_contents;
 
-  protected setContents($contents)
+  protected function setContents($contents)
   {
     $this->_contents = $contents;
   }
