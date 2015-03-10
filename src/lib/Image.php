@@ -14,12 +14,15 @@ class Image
   const SIGNATURE_PACK_FORMAT = 'C8';
 
   const CHUNK_LENGTH_BYTES = 4;
-  const CHUNK_LENGTH_FORMAT = 'L';
+  const CHUNK_LENGTH_FORMAT = 'N';
 
   const CHUNK_TYPE_BYTES = 4;
   const CHUNK_TYPE_FORMAT = 'a4';
 
   const CHUNK_CRC_BYTES = 4;
+  const CHUNK_CRC_FORMAT = 'N';
+
+  const CHUNK_DATA_FORMAT = 'a';
 
   const CHUNK_HEADER_BYTES = 8; // length + type
   const CHUNK_OVERHEAD_BYTES = 12; // length + type + CRC
@@ -41,12 +44,12 @@ class Image
     return ($header === $this->_signature);
   }
 
-  protected function getContents($contents)
+  private function validateCRC($crc, $type, $data)
   {
-    return $_contents;
+    return ($crc == crc32($type . $data));
   }
 
-  protected function setContents($contents)
+  private function validateContents($contents)
   {
     // First bytes of contents much match the signature
     $header = substr($contents, 0, self::SIGNATURE_BYTES);
@@ -61,14 +64,39 @@ class Image
     $position = self::SIGNATURE_BYTES;
 
     do {
+      // Grab header (length + type)
       $chunk_header = unpack($this->_chunk_header_format, substr($contents, $position, self::CHUNK_HEADER_BYTES));
       $chunk_size = $chunk_header['length'] + self::CHUNK_OVERHEAD_BYTES;
 
+      // Data starts after length + type (s5.3)
+      $data_position = $position + self::CHUNK_HEADER_BYTES;
+      $data_format = self::CHUNK_DATA_FORMAT . $chunk_header['length'];
+      $data = unpack($data_format, substr($contents, $data_position, $chunk_header['length']));
+
+      // CRC starts after length + type + data (s5.3)
+      $crc_position = $position + self::CHUNK_HEADER_BYTES + $chunk_header['length'];
+      $crc = unpack(self::CHUNK_CRC_FORMAT, substr($contents, $crc_position, self::CHUNK_CRC_BYTES));
+      $crc = implode($crc);
+
+      if (!$this->validateCRC($crc, $chunk_header['type'], implode($data)))
+      {
+        throw new \Exception('Invalid CRC');
+      }
+
       $position += $chunk_size;
     } while ($position < $size);
+  }
 
+  protected function getContents($contents)
+  {
+    return $_contents;
+  }
+
+  protected function setContents($contents)
+  {
+    $this->validateContents($contents);
 
     $this->_contents = $contents;
-    $this->_size = $size;
+    $this->_size = strlen($contents);
   }
 }
