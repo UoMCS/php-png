@@ -27,8 +27,11 @@ class Image
   const CHUNK_HEADER_BYTES = 8; // length + type
   const CHUNK_OVERHEAD_BYTES = 12; // length + type + CRC
 
+  const MAX_KEYWORD_BYTES = 79;
+  const NULL_SEPARATOR = '\0';
+  const IEND_CHUNK_BYTES = 12;
+
   private $_contents;
-  private $_size;
   private $_signature;
   private $_chunk_header_format;
 
@@ -83,8 +86,44 @@ class Image
         throw new \Exception('Invalid CRC');
       }
 
+      // Fetch next chunk
       $position += $chunk_size;
     } while ($position < $size);
+  }
+
+  private function addChunk($type, $data)
+  {
+    $length = pack('N', strlen($data));
+    $crc = pack('N', crc32($type . $data));
+
+    $chunk = $length . $type . $data . $crc;
+    $size = strlen($this->_contents);
+
+    // Insert new chunk before IEND chunk
+    $before_iend = substr($this->_contents, 0, $size - self::IEND_CHUNK_BYTES);
+    $iend = substr($this->_contents, $size - self::IEND_CHUNK_BYTES);
+    $contents = $before_iend . $chunk . $iend;
+
+    $this->setContents($contents);
+  }
+
+  public function addITXtChunk($key, $language, $text)
+  {
+    if (strlen($key) > self::MAX_KEYWORD_BYTES)
+    {
+      throw new \Exception('Key length ' . strlen($key) . ' greater than maximum: ' . self::MAX_KEYWORD_BYTES);
+    }
+
+    // Build up data field
+    $data = $key;
+    $data .= self::NULL_SEPARATOR;
+    $data .= '0'; // Compression flag
+    $data .= '0'; // Compression method
+    $data .= $language; // Language tag
+    $data .= self::NULL_SEPARATOR;
+    $data .= $text;
+
+    $this->addChunk('iTXt', $data);
   }
 
   protected function getContents($contents)
@@ -95,8 +134,6 @@ class Image
   protected function setContents($contents)
   {
     $this->validateContents($contents);
-
     $this->_contents = $contents;
-    $this->_size = strlen($contents);
   }
 }

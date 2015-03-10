@@ -11,4 +11,10 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
     $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
     $this->assertInstanceOf('UoMCS\\PNG\\ImageFile', $png);
   }
+
+  public function testAddChunk()
+  {
+    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png->addITXtChunk('openbadges', 'json', '{}');
+  }
 }
