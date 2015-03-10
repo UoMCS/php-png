@@ -28,7 +28,7 @@ class Image
   const CHUNK_OVERHEAD_BYTES = 12; // length + type + CRC
 
   const MAX_KEYWORD_BYTES = 79;
-  const NULL_SEPARATOR = '\0';
+  const NULL_SEPARATOR = "\0";
   const IEND_CHUNK_BYTES = 12;
 
   private $_contents;
@@ -117,9 +117,10 @@ class Image
     // Build up data field
     $data = $key;
     $data .= self::NULL_SEPARATOR;
-    $data .= '0'; // Compression flag
-    $data .= '0'; // Compression method
+    $data .= self::NULL_SEPARATOR; // Compression flag
+    $data .= self::NULL_SEPARATOR; // Compression method
     $data .= $language; // Language tag
+    $data .= self::NULL_SEPARATOR;
     $data .= self::NULL_SEPARATOR;
     $data .= $text;
 
