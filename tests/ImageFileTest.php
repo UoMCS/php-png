@@ -4,6 +4,7 @@ namespace UoMCS\PNG;
 
 class ImageFileTest extends \PHPUnit_Framework_TestCase
 {
+  const TEST_CHANGED_IMAGE_PATH = '/../data/test2.png';
   const TEST_IMAGE_PATH = '/../data/test1.png';
 
   public function testConstructor()
@@ -16,5 +17,8 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
   {
     $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
     $png->addITXtChunk('openbadges', 'json', '{}');
+
+    $png->setFilename(__DIR__ . self::TEST_CHANGED_IMAGE_PATH);
+    $png->save();
   }
 }

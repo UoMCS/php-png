@@ -126,9 +126,9 @@ class Image
     $this->addChunk('iTXt', $data);
   }
 
-  protected function getContents($contents)
+  protected function getContents()
   {
-    return $_contents;
+    return $this->_contents;
   }
 
   protected function setContents($contents)

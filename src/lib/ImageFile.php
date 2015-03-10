@@ -36,4 +36,24 @@ class ImageFile extends Image
 
     $this->setContents($contents);
   }
+
+  public function getFilename()
+  {
+    return $this->_filename;
+  }
+
+  public function setFilename($filename)
+  {
+    $this->_filename = $filename;
+  }
+
+  public function save()
+  {
+    $result = file_put_contents($this->_filename, $this->getContents());
+
+    if ($result === FALSE)
+    {
+      throw new \Exception('Could not write to file: ' . $this->_filename);
+    }
+  }
 }
