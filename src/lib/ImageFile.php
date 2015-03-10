@@ -4,6 +4,8 @@ namespace UoMCS\PNG;
 
 class ImageFile extends Image
 {
+  private $_filename;
+
   public function __construct($filename)
   {
     if (!file_exists($filename))
@@ -27,6 +29,8 @@ class ImageFile extends Image
     {
       throw new Exception('Could not read file: ' . $filename);
     }
+
+    $this->_filename = $filename;
 
     parent::__construct();
 
