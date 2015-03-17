@@ -91,6 +91,34 @@ class Image
     $this->addChunk('iTXt', $data);
   }
 
+  public function getITXtChunksFromKey($search_key)
+  {
+    $matches = array();
+    $search_type = 'iTXt';
+
+    if (count($this->_chunks) >= 1)
+    {
+      foreach ($this->_chunks as $chunk)
+      {
+        if ($chunk['type'] == $search_type)
+        {
+          $key_length = strpos($chunk['data'], self::NULL_SEPARATOR);
+
+          if ($key_length !== FALSE && $key_length > 0)
+          {
+            $chunk_key = substr($chunk['data'], 0, $key_length);
+            if ($chunk_key == $search_key)
+            {
+              $matches[] = $chunk;
+            }
+          }
+        }
+      }
+    }
+
+    return $matches;
+  }
+
   protected function getContents()
   {
     return $this->_contents;
@@ -138,6 +166,7 @@ class Image
       $chunk = array(
         'size' => $chunk_size,
         'type' => $chunk_header['type'],
+        'data_size' => $chunk_header['length'],
         'data' => $data,
         'crc' => $crc,
       );
