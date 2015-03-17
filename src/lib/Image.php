@@ -32,8 +32,9 @@ class Image
   const IEND_CHUNK_BYTES = 12;
 
   private $_contents;
-  private $_signature;
+  private $_signature_standard;
   private $_chunks;
+  private $_chunks_count;
   private $_header;
   private $_size;
   private $_chunk_header_format;
@@ -41,13 +42,13 @@ class Image
   public function __construct()
   {
     // PNG signature (s5.2)
-    $this->_signature = pack(self::SIGNATURE_PACK_FORMAT, 137, 80, 78, 71, 13, 10, 26, 10);
+    $this->_signature_standard = pack(self::SIGNATURE_PACK_FORMAT, 137, 80, 78, 71, 13, 10, 26, 10);
     $this->_chunk_header_format = self::CHUNK_LENGTH_FORMAT . 'length/' . self::CHUNK_TYPE_FORMAT . 'type';
   }
 
-  private function validateHeader($header)
+  private function validateSignature($signature)
   {
-    return ($header === $this->_signature);
+    return ($signature === $this->_signature_standard);
   }
 
   private function validateCRC($crc, $type, $data)
@@ -127,18 +128,17 @@ class Image
   protected function setContents($contents)
   {
     $this->_chunks = array();
+    $this->_chunks_count = 0;
 
     // First bytes of contents much match the signature
-    $header = substr($contents, 0, self::SIGNATURE_BYTES);
+    $signature = substr($contents, 0, self::SIGNATURE_BYTES);
 
-    if (!$this->validateHeader($header))
+    if (!$this->validateSignature($signature))
     {
-      throw new \Exception('Invalid image, header (' . $header . ') does not match signature (' . $this->_signature . ')');
+      throw new \Exception('Invalid image, signature (' . $signature . ') does not match signature standard (' . $this->_signature_standard . ')');
     }
 
-    $this->_header = $header;
-
-    // Start off by skipping header, read each chunk until the end
+    // Start off by skipping signature, read each chunk until the end
     $size = strlen($contents);
     $position = self::SIGNATURE_BYTES;
 
@@ -172,6 +172,7 @@ class Image
       );
 
       $this->_chunks[] = $chunk;
+      $this->_chunks_count += 1;
 
       // Fetch next chunk
       $position += $chunk_size;
