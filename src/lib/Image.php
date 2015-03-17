@@ -179,10 +179,16 @@ class Image
     } while ($position < $size);
 
     // Validate specific chunks and ordering
-    // First chunk must be the header
+    // First chunk must be the header (s11.2.2)
     if (strtoupper($this->_chunks[0]['type']) != 'IHDR')
     {
       throw new \Exception('First chunk after signature was not IHDR');
+    }
+
+    // Last chunk must be IEND (s11.2.5)
+    if (strtoupper($this->_chunks[$this->_chunks_count - 1]['type']) != 'IEND')
+    {
+      throw new \Exception('Last chunk was not IEND');
     }
 
     $this->_size = $size;
