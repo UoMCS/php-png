@@ -178,6 +178,13 @@ class Image
       $position += $chunk_size;
     } while ($position < $size);
 
+    // Validate specific chunks and ordering
+    // First chunk must be the header
+    if (strtoupper($this->_chunks[0]['type']) != 'IHDR')
+    {
+      throw new \Exception('First chunk after signature was not IHDR');
+    }
+
     $this->_size = $size;
     $this->_contents = $contents;
   }
