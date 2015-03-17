@@ -41,8 +41,7 @@ class Image
   private $_size;
   private $_chunk_header_format;
 
-  private $_width;
-  private $_height;
+  private $_metadata;
 
   public function __construct()
   {
@@ -127,12 +126,37 @@ class Image
 
   public function getWidth()
   {
-    return $this->_width;
+    return $this->_metadata['width'];
   }
 
   public function getHeight()
   {
-    return $this->_height;
+    return $this->_metadata['height'];
+  }
+
+  public function getBitDepth()
+  {
+    return $this->_metadata['bitdepth'];
+  }
+
+  public function getColourType()
+  {
+    return $this->_metadata['colourtype'];
+  }
+
+  public function getCompression()
+  {
+    return $this->_metadata['compression'];
+  }
+
+  public function getFilter()
+  {
+    return $this->_metadata['filter'];
+  }
+
+  public function getInterlace()
+  {
+    return $this->_metadata['interlace'];
   }
 
   public function getChunks()
@@ -213,10 +237,7 @@ class Image
       throw new \Exception('Last chunk was not IEND');
     }
 
-    $header = unpack(self::CHUNK_IHDR_FORMAT, $this->_chunks[0]['raw_data']);
-
-    $this->_width = $header['width'];
-    $this->_height = $header['height'];
+    $this->_metadata = unpack(self::CHUNK_IHDR_FORMAT, $this->_chunks[0]['raw_data']);
 
     $this->_size = $size;
     $this->_contents = $contents;

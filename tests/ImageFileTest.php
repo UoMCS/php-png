@@ -8,15 +8,64 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
   const TEST_IMAGE_PATH = '/../data/test1.png';
   const TEST_ITXT_IMAGE_PATH = '/../data/test3.png';
 
+  const TEST_IMAGE_WIDTH = 100;
+  const TEST_IMAGE_HEIGHT = 100;
+  const TEST_IMAGE_BIT_DEPTH = 8;
+  const TEST_IMAGE_COLOUR_TYPE = 2;
+  const TEST_IMAGE_COMPRESSION = 0;
+  const TEST_IMAGE_FILTER = 0;
+  const TEST_IMAGE_INTERLACE = 8;
+
+  private function getTestPng()
+  {
+    return new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+  }
+
   public function testConstructor()
   {
-    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png = $this->getTestPng();
     $this->assertInstanceOf('UoMCS\\PNG\\ImageFile', $png);
+  }
+
+  public function testGetWidth()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_WIDTH, $png->getWidth());
+  }
+
+  public function testGetHeight()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_HEIGHT, $png->getHeight());
+  }
+
+  public function testGetBitDepth()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_BIT_DEPTH, $png->getBitDepth());
+  }
+
+  public function testGetCompression()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_COMPRESSION, $png->getCompression());
+  }
+
+  public function testGetFilter()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_FILTER, $png->getFilter());
+  }
+
+  public function testGetInterlace()
+  {
+    $png = $this->getTestPng();
+    $this->assertEquals(self::TEST_IMAGE_INTERLACE, $png->getBitDepth());
   }
 
   public function testAddChunk()
   {
-    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png = $this->getTestPng();
     $png->addITXtChunk('openbadges', 'json', '{}');
 
     $png->setFilename(__DIR__ . self::TEST_CHANGED_IMAGE_PATH);
@@ -27,7 +76,7 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
   {
     $key = str_repeat('x', Image::MAX_KEYWORD_BYTES);
 
-    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png = $this->getTestPng();
     $png->addITXtChunk($key, 'en', '');
   }
 
@@ -38,7 +87,7 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
   {
     $key = str_repeat('x', Image::MAX_KEYWORD_BYTES + 1);
 
-    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png = $this->getTestPng();
     $png->addITXtChunk($key, 'en', '');
   }
 
@@ -52,7 +101,7 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
 
   public function testGetITXtChunkFromKeyNoMatch()
   {
-    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png = $this->getTestPng();
     $matches = $png->getITXtChunksFromKey('openbadges');
 
     $this->assertCount(0, $matches);
