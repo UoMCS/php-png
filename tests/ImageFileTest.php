@@ -23,6 +23,25 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
     $png->save();
   }
 
+  public function testAddChunkMaxKey()
+  {
+    $key = str_repeat('x', Image::MAX_KEYWORD_BYTES);
+
+    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png->addITXtChunk($key, 'en', '');
+  }
+
+  /**
+   * @expectedException Exception
+   */
+  public function testAddChunkOverMaxKey()
+  {
+    $key = str_repeat('x', Image::MAX_KEYWORD_BYTES + 1);
+
+    $png = new ImageFile(__DIR__ . self::TEST_IMAGE_PATH);
+    $png->addITXtChunk($key, 'en', '');
+  }
+
   public function testGetITXtChunkFromKeyMatch()
   {
     $png = new ImageFile(__DIR__ . self::TEST_ITXT_IMAGE_PATH);
