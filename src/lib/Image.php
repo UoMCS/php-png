@@ -31,13 +31,18 @@ class Image
   const NULL_SEPARATOR = "\0";
   const IEND_CHUNK_BYTES = 12;
 
+  // IHDR format (s11.2.2)
+  const CHUNK_IHDR_FORMAT = 'Nwidth/Nheight/Cbitdepth/Ccolourtype/Ccompression/Cfilter/Cinterlace';
+
   private $_contents;
   private $_signature_standard;
   private $_chunks;
   private $_chunks_count;
-  private $_header;
   private $_size;
   private $_chunk_header_format;
+
+  private $_width;
+  private $_height;
 
   public function __construct()
   {
@@ -120,6 +125,21 @@ class Image
     return $matches;
   }
 
+  public function getWidth()
+  {
+    return $this->_width;
+  }
+
+  public function getHeight()
+  {
+    return $this->_height;
+  }
+
+  public function getChunks()
+  {
+    return $this->_chunks;
+  }
+
   protected function getContents()
   {
     return $this->_contents;
@@ -150,7 +170,8 @@ class Image
       // Data starts after length + type (s5.3)
       $data_position = $position + self::CHUNK_HEADER_BYTES;
       $data_format = self::CHUNK_DATA_FORMAT . $chunk_header['length'];
-      $data = unpack($data_format, substr($contents, $data_position, $chunk_header['length']));
+      $raw_data = substr($contents, $data_position, $chunk_header['length']);
+      $data = unpack($data_format, $raw_data);
       $data = implode($data);
 
       // CRC starts after length + type + data (s5.3)
@@ -168,6 +189,7 @@ class Image
         'type' => $chunk_header['type'],
         'data_size' => $chunk_header['length'],
         'data' => $data,
+        'raw_data' => $raw_data,
         'crc' => $crc,
       );
 
@@ -190,6 +212,11 @@ class Image
     {
       throw new \Exception('Last chunk was not IEND');
     }
+
+    $header = unpack(self::CHUNK_IHDR_FORMAT, $this->_chunks[0]['raw_data']);
+
+    $this->_width = $header['width'];
+    $this->_height = $header['height'];
 
     $this->_size = $size;
     $this->_contents = $contents;
