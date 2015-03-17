@@ -33,6 +33,9 @@ class Image
 
   private $_contents;
   private $_signature;
+  private $_chunks;
+  private $_header;
+  private $_size;
   private $_chunk_header_format;
 
   public function __construct()
@@ -50,45 +53,6 @@ class Image
   private function validateCRC($crc, $type, $data)
   {
     return ($crc == crc32($type . $data));
-  }
-
-  private function validateContents($contents)
-  {
-    // First bytes of contents much match the signature
-    $header = substr($contents, 0, self::SIGNATURE_BYTES);
-
-    if (!$this->validateHeader($header))
-    {
-      throw new \Exception('Invalid image, header (' . $header . ') does not match signature (' . $this->_signature . ')');
-    }
-
-    // Start off by skipping header, read each chunk until the end
-    $size = strlen($contents);
-    $position = self::SIGNATURE_BYTES;
-
-    do {
-      // Grab header (length + type)
-      $chunk_header = unpack($this->_chunk_header_format, substr($contents, $position, self::CHUNK_HEADER_BYTES));
-      $chunk_size = $chunk_header['length'] + self::CHUNK_OVERHEAD_BYTES;
-
-      // Data starts after length + type (s5.3)
-      $data_position = $position + self::CHUNK_HEADER_BYTES;
-      $data_format = self::CHUNK_DATA_FORMAT . $chunk_header['length'];
-      $data = unpack($data_format, substr($contents, $data_position, $chunk_header['length']));
-
-      // CRC starts after length + type + data (s5.3)
-      $crc_position = $position + self::CHUNK_HEADER_BYTES + $chunk_header['length'];
-      $crc = unpack(self::CHUNK_CRC_FORMAT, substr($contents, $crc_position, self::CHUNK_CRC_BYTES));
-      $crc = implode($crc);
-
-      if (!$this->validateCRC($crc, $chunk_header['type'], implode($data)))
-      {
-        throw new \Exception('Invalid CRC');
-      }
-
-      // Fetch next chunk
-      $position += $chunk_size;
-    } while ($position < $size);
   }
 
   private function addChunk($type, $data)
@@ -134,7 +98,57 @@ class Image
 
   protected function setContents($contents)
   {
-    $this->validateContents($contents);
+    $this->_chunks = array();
+
+    // First bytes of contents much match the signature
+    $header = substr($contents, 0, self::SIGNATURE_BYTES);
+
+    if (!$this->validateHeader($header))
+    {
+      throw new \Exception('Invalid image, header (' . $header . ') does not match signature (' . $this->_signature . ')');
+    }
+
+    $this->_header = $header;
+
+    // Start off by skipping header, read each chunk until the end
+    $size = strlen($contents);
+    $position = self::SIGNATURE_BYTES;
+
+    do {
+      // Grab chunk header (length + type)
+      $chunk_header = unpack($this->_chunk_header_format, substr($contents, $position, self::CHUNK_HEADER_BYTES));
+      $chunk_size = $chunk_header['length'] + self::CHUNK_OVERHEAD_BYTES;
+
+      // Data starts after length + type (s5.3)
+      $data_position = $position + self::CHUNK_HEADER_BYTES;
+      $data_format = self::CHUNK_DATA_FORMAT . $chunk_header['length'];
+      $data = unpack($data_format, substr($contents, $data_position, $chunk_header['length']));
+      $data = implode($data);
+
+      // CRC starts after length + type + data (s5.3)
+      $crc_position = $position + self::CHUNK_HEADER_BYTES + $chunk_header['length'];
+      $crc = unpack(self::CHUNK_CRC_FORMAT, substr($contents, $crc_position, self::CHUNK_CRC_BYTES));
+      $crc = implode($crc);
+
+      if (!$this->validateCRC($crc, $chunk_header['type'], $data))
+      {
+        throw new \Exception('Invalid CRC');
+      }
+
+      $chunk = array(
+        'size' => $chunk_size,
+        'type' => $chunk_header['type'],
+        'data' => $data,
+        'crc' => $crc,
+      );
+
+      $this->_chunks[] = $chunk;
+
+      // Fetch next chunk
+      $position += $chunk_size;
+    } while ($position < $size);
+
+    $this->_size = $size;
     $this->_contents = $contents;
   }
 }
