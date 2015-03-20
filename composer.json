@@ -1,5 +1,6 @@
 {
   "name": "uomcs/php-png",
+  "description": "Library for manipulating PNG files in PHP",
   "repositories": [
     {
       "type": "vcs",
