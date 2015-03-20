@@ -1,0 +1,12 @@
+{
+  "name": "uomcs/php-png",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/UoMCS/php-png"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  }
+}
