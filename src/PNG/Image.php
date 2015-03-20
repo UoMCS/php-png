@@ -169,7 +169,7 @@ class Image
     return $this->_contents;
   }
 
-  protected function setContents($contents)
+  public function setContents($contents)
   {
     $this->_chunks = array();
     $this->_chunks_count = 0;
