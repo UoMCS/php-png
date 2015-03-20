@@ -164,7 +164,7 @@ class Image
     return $this->_chunks;
   }
 
-  protected function getContents()
+  public function getContents()
   {
     return $this->_contents;
   }
