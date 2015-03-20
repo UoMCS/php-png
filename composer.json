@@ -7,6 +7,9 @@
       "url": "https://github.com/UoMCS/php-png"
     }
   ],
+  "autoload": {
+    "psr-0": { "PNG": "src/"}
+  },
   "require": {
     "php": ">=5.4.0"
   }
