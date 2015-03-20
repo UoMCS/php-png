@@ -1,6 +1,6 @@
 <?php
 
-namespace UoMCS\PNG;
+namespace PNG;
 
 class ImageFileTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,7 +24,7 @@ class ImageFileTest extends \PHPUnit_Framework_TestCase
   public function testConstructor()
   {
     $png = $this->getTestPng();
-    $this->assertInstanceOf('UoMCS\\PNG\\ImageFile', $png);
+    $this->assertInstanceOf('PNG\\ImageFile', $png);
   }
 
   public function testGetWidth()

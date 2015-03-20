@@ -1,6 +1,6 @@
 <?php
 
-namespace UoMCS\PNG;
+namespace PNG;
 
 /**
  * Top level Image class.

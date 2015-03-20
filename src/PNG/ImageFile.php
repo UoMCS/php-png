@@ -1,6 +1,6 @@
 <?php
 
-namespace UoMCS\PNG;
+namespace PNG;
 
 class ImageFile extends Image
 {
