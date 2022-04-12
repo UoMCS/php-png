@@ -5,7 +5,8 @@ namespace PNG;
 /**
  * Top level Image class.
  *
- * Comments with (sX.Y) refer to relevant section of the specification.
+ * Comments with (sX.Y) refer to relevant section of the specification,
+ * which is available at https://www.w3.org/TR/PNG/ .
  *
  */
 class Image
